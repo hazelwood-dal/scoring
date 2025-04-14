@@ -18,6 +18,7 @@
           <th>Status Code</th>
           <th>Response Time (ms)</th>
           <th>Score</th>
+          <th>Total Score</th>
           <th>Error</th>
         </tr>
       `;
@@ -31,6 +32,7 @@
             <td>${item.status_code || ""}</td>
             <td>${item.response_time_ms || ""}</td>
             <td>${item.score}</td>
+            <td>${item.total_score || 0}</td>
             <td>${item.error || ""}</td>
           </tr>
         `;

@@ -21,5 +21,6 @@ def api_results():
     return jsonify(results)
 
 if __name__ == "__main__":
+    results = grade_all_teams()  # populate immediately on start
     Thread(target=background_scoring, daemon=True).start()
     app.run(debug=True, host="0.0.0.0", port=5000)

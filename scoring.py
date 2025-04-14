@@ -1,7 +1,32 @@
+import json
+import os
 import re
 import requests
 import time
 import urllib3
+
+SCORE_FILE = "score_history.json"
+
+# Load existing score history at startup
+if os.path.exists(SCORE_FILE):
+    with open(SCORE_FILE, "r") as f:
+        score_history = json.load(f)
+else:
+    score_history = {}
+
+
+def save_scores():
+    with open(SCORE_FILE, "w") as f:
+        json.dump(score_history, f)
+
+
+def accumulate_score(result):
+    key = f"{result['team']}::{result['host']}::{result['endpoint']}"
+    score_history[key] = score_history.get(key, 0) + result['score']
+    result['total_score'] = score_history[key]
+    save_scores()
+    return result
+
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -22,6 +47,7 @@ CRIT_HOSTS = [("https", "25")]
 NONCRIT_HOSTS = [("http", "26")]
 
 score_history = {}  # key = team+endpoint+host, value = total score
+
 
 def check_endpoint(team, protocol, host_suffix, octet, endpoint):
     ip = f"172.16.{octet}.{host_suffix}"
@@ -63,11 +89,7 @@ def check_endpoint(team, protocol, host_suffix, octet, endpoint):
             "error": str(e)
         }
 
-def accumulate_score(result):
-    key = f"{result['team']}::{result['host']}::{result['endpoint']}"
-    score_history[key] = score_history.get(key, 0) + result['score']
-    result['total_score'] = score_history[key]
-    return result
+
 
 def grade_all_teams():
     results = []
@@ -86,10 +108,12 @@ def grade_all_teams():
                 results.append(result)
     return results
 
+
 def main():
     results = grade_all_teams()
     for r in results:
         print(r)
+
 
 if __name__ == "__main__":
     main()
