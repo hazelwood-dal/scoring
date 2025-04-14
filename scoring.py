@@ -34,14 +34,15 @@ def check_endpoint(team, protocol, host_suffix, octet, endpoint):
     url = f"{protocol}://{ip}{endpoint}"
     try:
         start = time.time()
-        print(url)
+        #print(url)
         response = requests.get(url, timeout=10, verify=False)
-        print(response.text)
+        #print(response.text)
         end = time.time()
         duration_ms = (end - start) * 1000
 
         # Parse <p>...</p> from HTML
         match = re.search(r"<p>(.*?)</p>", response.text, re.IGNORECASE)
+        print(match.group(1).strip())
         status_text = match.group(1).strip() if match else "Unknown"
 
         # Award points only if status is "On"
