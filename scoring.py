@@ -74,6 +74,13 @@ def check_endpoint(team, protocol, host_suffix, octet, endpoint):
             "error": str(e)
         }
 
+score_history = {}  # key = team+endpoint+host, value = total score
+
+def accumulate_score(result):
+    key = f"{result['team']}::{result['host']}::{result['endpoint']}"
+    score_history[key] = score_history.get(key, 0) + result['score']
+    result['total_score'] = score_history[key]
+    return result
 
 def grade_all_teams():
     results = []
@@ -81,7 +88,7 @@ def grade_all_teams():
         for protocol, host_suffix in HOSTS:
             for endpoint in ENDPOINTS:
                 result = check_endpoint(team, protocol, host_suffix, octet, endpoint)
-                #print(result)
+                result = accumulate_score(result)
                 results.append(result)
     return results
 
