@@ -1,51 +1,41 @@
 import re
-import time
-
 import requests
+import time
 import urllib3
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 TEAM_OCTETS = {
-    "Team 1": 1,
-    "Team 2": 2,
-    "Team 3": 3,
-    "Team 4": 4,
-    "Team 5": 5,
-    "Team 6": 6,
-    "Team 7": 7
+    "Team 1": 1, "Team 2": 2, "Team 3": 3, "Team 4": 4,
+    "Team 5": 5, "Team 6": 6, "Team 7": 7
 }
 
-ENDPOINTS = [
-    "/api/pumpSTATUS",
-    "/api/crit1STATUS",
-    "/api/crit2STATUS",
-    "/api/crit3STATUS",
+CRIT_ENDPOINTS = [
+    "/api/pumpSTATUS", "/api/crit1STATUS", "/api/crit2STATUS", "/api/crit3STATUS"
 ]
 
-HOSTS = [
-    ("https", "25"),  # HTTPS
-    ("http", "26"),  # HTTP
+NONCRIT_ENDPOINTS = [
+    "/api/SewagepumpSTATUS", "/api/Noncrit1STATUS", "/api/Noncrit2STATUS", "/api/Noncrit3STATUS"
 ]
 
+CRIT_HOSTS = [("https", "25")]
+NONCRIT_HOSTS = [("http", "26")]
+
+score_history = {}  # key = team+endpoint+host, value = total score
 
 def check_endpoint(team, protocol, host_suffix, octet, endpoint):
     ip = f"172.16.{octet}.{host_suffix}"
     url = f"{protocol}://{ip}{endpoint}"
     try:
         start = time.time()
-        #print(url)
         response = requests.get(url, timeout=10, verify=False)
-        #print(response.text)
         end = time.time()
         duration_ms = (end - start) * 1000
 
-        # Parse <p>...</p> from HTML
         match = re.search(r"<p>(.*?)</p>", response.text, re.IGNORECASE)
-        print(match.group(1).strip())
         status_text = match.group(1).strip() if match else "Unknown"
+        print(f"{url} → {status_text}")
 
-        # Award points only if status is "On"
         score = 10 if status_text.lower() == "on" else 0
 
         return {
@@ -61,7 +51,6 @@ def check_endpoint(team, protocol, host_suffix, octet, endpoint):
         }
 
     except Exception as e:
-        # Still return a row even if error
         return {
             "team": team,
             "host": ip,
@@ -74,8 +63,6 @@ def check_endpoint(team, protocol, host_suffix, octet, endpoint):
             "error": str(e)
         }
 
-score_history = {}  # key = team+endpoint+host, value = total score
-
 def accumulate_score(result):
     key = f"{result['team']}::{result['host']}::{result['endpoint']}"
     score_history[key] = score_history.get(key, 0) + result['score']
@@ -85,18 +72,24 @@ def accumulate_score(result):
 def grade_all_teams():
     results = []
     for team, octet in TEAM_OCTETS.items():
-        for protocol, host_suffix in HOSTS:
-            for endpoint in ENDPOINTS:
+        # Check critical endpoints
+        for protocol, host_suffix in CRIT_HOSTS:
+            for endpoint in CRIT_ENDPOINTS:
+                result = check_endpoint(team, protocol, host_suffix, octet, endpoint)
+                result = accumulate_score(result)
+                results.append(result)
+        # Check non-critical endpoints
+        for protocol, host_suffix in NONCRIT_HOSTS:
+            for endpoint in NONCRIT_ENDPOINTS:
                 result = check_endpoint(team, protocol, host_suffix, octet, endpoint)
                 result = accumulate_score(result)
                 results.append(result)
     return results
 
 def main():
-
     results = grade_all_teams()
-    #print(results)
-
+    for r in results:
+        print(r)
 
 if __name__ == "__main__":
     main()
