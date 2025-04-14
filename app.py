@@ -10,6 +10,7 @@ def background_scoring():
     global results
     while True:
         results = grade_all_teams()
+        print("###### WAITING 120s ###########")
         time.sleep(120)
 
 @app.route("/")
