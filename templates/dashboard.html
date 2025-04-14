@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Team API Dashboard</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <script>
+    async function fetchData() {
+      const res = await fetch("/api/results");
+      const data = await res.json();
+      const table = document.getElementById("results");
+      table.innerHTML = `
+        <tr>
+          <th>Team</th>
+          <th>Host</th>
+          <th>Endpoint</th>
+          <th>Status</th>
+          <th>Status Code</th>
+          <th>Response Time (ms)</th>
+          <th>Score</th>
+          <th>Error</th>
+        </tr>
+      `;
+      data.forEach(item => {
+        table.innerHTML += `
+          <tr>
+            <td>${item.team}</td>
+            <td>${item.host}</td>
+            <td>${item.endpoint}</td>
+            <td>${item.status || ""}</td>
+            <td>${item.status_code || ""}</td>
+            <td>${item.response_time_ms || ""}</td>
+            <td>${item.score}</td>
+            <td>${item.error || ""}</td>
+          </tr>
+        `;
+      });
+    }
+
+    setInterval(fetchData, 5000);
+    window.onload = fetchData;
+  </script>
+</head>
+<body>
+  <h1>Live API Status Dashboard</h1>
+  <table id="results" border="1"></table>
+</body>
+</html>
