@@ -86,7 +86,7 @@ def grade_all_teams():
 
 def main():
     results = grade_all_teams()
-    print(results)
+    #print(results)
 
 
 if __name__ == "__main__":
