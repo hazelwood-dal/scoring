@@ -81,7 +81,7 @@ def grade_all_teams():
         for protocol, host_suffix in HOSTS:
             for endpoint in ENDPOINTS:
                 result = check_endpoint(team, protocol, host_suffix, octet, endpoint)
-                print(result)
+                #print(result)
                 results.append(result)
     return results
 
