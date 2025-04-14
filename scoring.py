@@ -36,7 +36,7 @@ def check_endpoint(team, protocol, host_suffix, octet, endpoint):
         start = time.time()
         print(url)
         response = requests.get(url, timeout=10, verify=False)
-        #print(response.text)
+        print(response.text)
         end = time.time()
         duration_ms = (end - start) * 1000
 
@@ -85,6 +85,7 @@ def grade_all_teams():
     return results
 
 def main():
+
     results = grade_all_teams()
     #print(results)
 
