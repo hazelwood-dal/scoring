@@ -24,18 +24,19 @@ ENDPOINTS = [
 ]
 
 HOSTS = [
-    ("https", ".25"),  # HTTPS
-    ("http", ".26"),  # HTTP
+    ("https", "25"),  # HTTPS
+    ("http", "26"),  # HTTP
 ]
 
 
 def check_endpoint(team, protocol, host_suffix, octet, endpoint):
-    ip = f"172.16.{octet}{host_suffix}"
+    ip = f"172.16.{octet}.{host_suffix}"
     url = f"{protocol}://{ip}{endpoint}"
     try:
         start = time.time()
+        print(url)
         response = requests.get(url, timeout=10, verify=False)
-        print(response.text)
+        #print(response.text)
         end = time.time()
         duration_ms = (end - start) * 1000
 
@@ -44,7 +45,7 @@ def check_endpoint(team, protocol, host_suffix, octet, endpoint):
         status_text = match.group(1).strip() if match else "Unknown"
 
         # Award points only if status is "On"
-        score = 20 if status_text.lower() == "on" else 0
+        score = 10 if status_text.lower() == "on" else 0
 
         return {
             "team": team,
